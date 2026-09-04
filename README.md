@@ -14,7 +14,7 @@ mapiol/
 ## Démarrage — développement local
 
 Deux options pour PostgreSQL : Docker (`docker-compose.yml`), ou une instance PostgreSQL déjà
-installée en local (créer simplement un rôle/une base `mapiol` — voir `application.yml`).
+installée en local (créer simplement un rôle/une base `mapiol` — voir `application.properties`).
 
 ```bash
 # 1. Dépendances — au choix :
