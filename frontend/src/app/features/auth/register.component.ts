@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../core/services/auth.service';
+import { describeAuthError } from '../../core/utils/http-error.util';
 
 /** Inscription propriétaire — preuve de bout en bout (phase 1), maquette définitive en phase 2. */
 @Component({
@@ -107,8 +108,8 @@ export class RegisterComponent {
     try {
       await this.authService.register(this.form.getRawValue());
       this.router.navigateByUrl('/');
-    } catch {
-      this.error.set('Cet email est peut-être déjà utilisé — vérifiez vos informations.');
+    } catch (err) {
+      this.error.set(describeAuthError(err, 'Cet email est peut-être déjà utilisé — vérifiez vos informations.'));
     } finally {
       this.loading.set(false);
     }

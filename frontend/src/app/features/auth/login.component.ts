@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../core/services/auth.service';
+import { describeAuthError } from '../../core/utils/http-error.util';
 
 /** Écran de connexion — preuve de bout en bout de l'authentification JWT (phase 1). */
 @Component({
@@ -86,8 +87,8 @@ export class LoginComponent {
     try {
       await this.authService.login(this.form.getRawValue());
       this.router.navigateByUrl('/');
-    } catch {
-      this.error.set('Email ou mot de passe incorrect.');
+    } catch (err) {
+      this.error.set(describeAuthError(err, 'Email ou mot de passe incorrect.'));
     } finally {
       this.loading.set(false);
     }

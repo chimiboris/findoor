@@ -45,6 +45,11 @@ management:
     web:
       exposure:
         include: health,info
+  health:
+    # Le mail (MailHog en dev, cf. docker-compose.yml) est optionnel : son indisponibilité
+    # ne doit pas faire tomber la santé globale de l'application.
+    mail:
+      enabled: false
 
 mapiol:
   jwt:
