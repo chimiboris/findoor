@@ -5,7 +5,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Identité MA PIOL (affinée lors des maquettes de la phase 2).
+        // Identité Findoor (affinée lors des maquettes de la phase 2).
         primary: {
           DEFAULT: '#0f9b9b',
           50: '#eafbfb',

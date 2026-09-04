@@ -13,7 +13,7 @@
 @include mat.core();
 
 // Define the theme object.
-// Palette provisoire proche du teal de l'identité MA PIOL — affinée lors des maquettes (phase 2).
+// Palette provisoire proche du teal — affinée lors des maquettes (phase 2).
 $frontend-theme: mat.define-theme((
   color: (
     theme-type: light,

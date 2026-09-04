@@ -2,15 +2,15 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: mapiol
-      POSTGRES_USER: mapiol
-      POSTGRES_PASSWORD: mapiol
+      POSTGRES_DB: findoor
+      POSTGRES_USER: findoor
+      POSTGRES_PASSWORD: findoor
     ports:
       - "5432:5432"
     volumes:
-      - mapiol_postgres_data:/var/lib/postgresql/data
+      - findoor_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mapiol"]
+      test: ["CMD-SHELL", "pg_isready -U findoor"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -25,7 +25,7 @@ services:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - mapiol_minio_data:/data
+      - findoor_minio_data:/data
 
   mailhog:
     image: mailhog/mailhog:latest
@@ -34,5 +34,5 @@ services:
       - "8025:8025"
 
 volumes:
-  mapiol_postgres_data:
-  mapiol_minio_data:
+  findoor_postgres_data:
+  findoor_minio_data:

@@ -10,7 +10,7 @@ export function describeAuthError(err: unknown, fallback: string): string {
       return "Impossible de contacter le serveur — vérifiez votre connexion ou réessayez dans un instant.";
     }
     if (err.status >= 500) {
-      return 'Le serveur MA PIOL rencontre un problème — réessayez dans un instant.';
+      return 'Le serveur Findoor rencontre un problème — réessayez dans un instant.';
     }
     const backendMessage = (err.error as { message?: string } | null)?.message;
     if (backendMessage) {

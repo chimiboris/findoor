@@ -14,7 +14,7 @@ import { SessionService } from '../../core/services/session.service';
   imports: [CommonModule, RouterLink, MatButtonModule],
   template: `
     <div class="hero">
-      <h1>MA PIOL</h1>
+      <h1>Findoor</h1>
       <p>Location et vente de biens immobiliers — plateforme en construction.</p>
 
       @if (session.isAuthenticated()) {

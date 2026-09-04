@@ -1,4 +1,4 @@
-/** Miroir des DTOs du backend (com.mapiol.backend.web.dto). */
+/** Miroir des DTOs du backend (com.findoor.backend.web.dto). */
 
 export type Role = 'VISITEUR' | 'PROPRIETAIRE' | 'ADMIN';
 

@@ -2,9 +2,9 @@ import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthResponse, Role, UserResponse } from '../models/auth.models';
 
-const TOKEN_KEY = 'mapiol_access_token';
-const REFRESH_KEY = 'mapiol_refresh_token';
-const USER_KEY = 'mapiol_user';
+const TOKEN_KEY = 'findoor_access_token';
+const REFRESH_KEY = 'findoor_refresh_token';
+const USER_KEY = 'findoor_user';
 
 /** Session côté client — sûre en SSR (aucun accès à localStorage côté serveur). */
 @Injectable({ providedIn: 'root' })

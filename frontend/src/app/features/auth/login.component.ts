@@ -26,7 +26,7 @@ import { describeAuthError } from '../../core/utils/http-error.util';
     <div class="wrap">
       <form class="card" [formGroup]="form" (ngSubmit)="submit()">
         <h1>Connexion propriétaire</h1>
-        <p class="subtitle">Accédez à votre espace pour gérer vos annonces MA PIOL.</p>
+        <p class="subtitle">Accédez à votre espace pour gérer vos annonces Findoor.</p>
 
         <mat-form-field appearance="outline">
           <mat-label>Email</mat-label>
