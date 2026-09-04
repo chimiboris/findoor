@@ -1,0 +1,3 @@
+# Racine du monorepo — chaque sous-projet a aussi son propre .gitignore.
+.DS_Store
+*.log
