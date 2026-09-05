@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/public/**", "/media/**", "/actuator/health", "/actuator/info", "/sitemap.xml")
+                        .requestMatchers("/api/auth/**", "/api/public/**", "/media/**", "/seed-media/**", "/actuator/health", "/actuator/info", "/sitemap.xml")
                         .permitAll()
                         .requestMatchers("/api/admin/**")
                         .hasRole("ADMIN")

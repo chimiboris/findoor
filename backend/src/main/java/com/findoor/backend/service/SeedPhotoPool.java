@@ -12,11 +12,13 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
 /**
- * Charge le petit lot de vraies photos immobilières (chambre à coucher, façade de villa, terrain nu…)
- * embarqué sous {@code src/main/resources/seed-photos/<catégorie>/} et les enregistre une seule fois
- * via {@link FileStorageService} pour obtenir des URLs /media/** stables, réutilisées par le
- * {@code DataSeeder} sur plusieurs annonces. Remplace l'ancien rendu généré ({@code ListingImageGenerator})
- * par de vraies photographies (voir retour utilisateur phase 3).
+ * Référence le petit lot de vraies photos immobilières (chambre à coucher, façade de villa, terrain
+ * nu…) embarqué dans le jar sous {@code src/main/resources/seed-photos/<catégorie>/}, servi
+ * directement sous /seed-media/** (cf. WebConfig) — réutilisé par le {@code DataSeeder} sur plusieurs
+ * annonces. Sert les fichiers du classpath tels quels (pas de copie vers le disque local via
+ * FileStorageService) : sur un hébergement gratuit comme Render, ce disque est effacé à chaque
+ * redémarrage/réveil du service, alors que le contenu du jar, lui, survit toujours — les photos de
+ * démonstration restent donc visibles indéfiniment, sans dépendre d'un stockage externe.
  */
 @Component
 public class SeedPhotoPool {
@@ -31,14 +33,9 @@ public class SeedPhotoPool {
             "Immeuble", "immeuble",
             "Local commercial", "local");
 
-    private final FileStorageService fileStorageService;
     private Map<String, List<String>> urlsParCategorie;
 
-    public SeedPhotoPool(FileStorageService fileStorageService) {
-        this.fileStorageService = fileStorageService;
-    }
-
-    /** Retourne les URLs /media/** disponibles pour le type de bien donné (chargées à la demande, une seule fois). */
+    /** Retourne les URLs /seed-media/** disponibles pour le type de bien donné (chargées à la demande, une seule fois). */
     public List<String> urlsPour(String typeBien) {
         if (urlsParCategorie == null) {
             urlsParCategorie = chargerToutesLesCategories();
@@ -57,9 +54,7 @@ public class SeedPhotoPool {
                 for (Resource r : resources) {
                     String nom = r.getFilename();
                     if (nom == null) continue;
-                    String ext = nom.substring(nom.lastIndexOf('.') + 1);
-                    byte[] bytes = r.getInputStream().readAllBytes();
-                    urls.add(fileStorageService.storeBytes(bytes, ext));
+                    urls.add("/seed-media/" + categorie + "/" + nom);
                 }
                 resultat.put(categorie, urls);
             } catch (IOException e) {

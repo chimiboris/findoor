@@ -41,15 +41,4 @@ public class FileStorageService {
         }
         return "/media/" + filename;
     }
-
-    /** Enregistre des octets déjà encodés (ex. PNG généré par {@link ListingImageGenerator}) sous /media/**. */
-    public String storeBytes(byte[] data, String extension) {
-        String filename = UUID.randomUUID() + "." + extension;
-        try {
-            Files.write(root.resolve(filename), data);
-        } catch (IOException e) {
-            throw new IllegalStateException("Échec de l'enregistrement de l'image générée : " + filename, e);
-        }
-        return "/media/" + filename;
-    }
 }
