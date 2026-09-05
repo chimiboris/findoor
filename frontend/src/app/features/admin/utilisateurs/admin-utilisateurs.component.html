@@ -1,0 +1,72 @@
+<app-top-nav />
+
+<div class="wrap admin-wrap">
+  <app-back-button fallback="/admin/tableau-de-bord" />
+  <div class="head-row">
+    <h1>{{ i18n.t('admin.usersTitle') }}</h1>
+    <a class="btn btn-gold btn-sm" routerLink="/admin/utilisateurs/nouveau">+ {{ i18n.t('admin.newUser') }}</a>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" [placeholder]="i18n.t('admin.searchPh')" [ngModel]="recherche()" (ngModelChange)="recherche.set($event)" />
+  </div>
+
+  @if (erreur()) {
+    <p class="error">{{ erreur() }}</p>
+  }
+
+  @if (loading()) {
+    <div class="empty-note">…</div>
+  } @else if (!filtres().length) {
+    <div class="empty-note">{{ i18n.t('admin.noResults') }}</div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>{{ i18n.t('admin.email') }}</th>
+            <th>{{ i18n.t('admin.role') }}</th>
+            <th>{{ i18n.t('admin.status') }}</th>
+            <th>{{ i18n.t('admin.subscriptionUntil') }}</th>
+            <th>{{ i18n.t('admin.registered') }}</th>
+            <th>{{ i18n.t('admin.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of filtres(); track u.id) {
+            <tr [class.inactive]="!u.actif" (click)="voir(u)">
+              <td>
+                <div class="avatar">{{ u.prenom.charAt(0) }}{{ u.nom.charAt(0) }}</div>
+              </td>
+              <td>
+                <div class="u-name">{{ u.prenom }} {{ u.nom }}</div>
+                <div class="u-email">{{ u.email }}</div>
+              </td>
+              <td><span class="role-badge" [class.role-admin]="u.role === 'ADMIN'">{{ u.role }}</span></td>
+              <td>
+                <span class="badge" [class.badge-suspended]="!u.actif">{{ u.actif ? i18n.t('admin.statusActive') : i18n.t('admin.statusSuspended') }}</span>
+              </td>
+              <td class="mono">
+                @if (u.role === 'PROPRIETAIRE') {
+                  <span [class.subscription-off]="!u.abonnementActif">{{ u.dateAccesExpire ? formatDate(u.dateAccesExpire) : i18n.t('admin.noSubscription') }}</span>
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+              <td class="mono">{{ formatDate(u.dateCreation) }}</td>
+              <td (click)="$event.stopPropagation()">
+                <a class="btn btn-ghost btn-sm" [routerLink]="['/admin/utilisateurs', u.id]" [queryParams]="{ edit: '1' }">{{ i18n.t('admin.edit') }}</a>
+                <button class="btn btn-ghost btn-sm" type="button" [disabled]="busyId() === u.id" (click)="basculer(u)">
+                  {{ u.actif ? i18n.t('admin.suspend') : i18n.t('admin.reactivate') }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<app-site-footer />

@@ -3,6 +3,12 @@
 @use '@angular/material' as mat;
 // Plus imports for other components in your app.
 
+// Preflight est désactivé (voir tailwind.config.js — pour ne pas perturber les composants Angular
+// Material) mais sa règle la plus structurante manque alors : sans elle, tout élément qui combine une
+// largeur en % et un padding/bordure déborde de son parent (ex. bouton pleine largeur "Contacter sur
+// WhatsApp" qui débordait de sa carte). On la restaure seule, sans le reste des resets de Preflight.
+*, *::before, *::after { box-sizing: border-box; }
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -42,3 +48,68 @@ $frontend-theme: mat.define-theme((
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/**
+ * Identité visuelle Findoor (validée en phase 2 — voir la maquette) : jetons de couleur/typo
+ * partagés par les pages publiques (accueil, recherche, fiche annonce). Les pages Material
+ * (connexion/inscription) restent sur la palette Material ci-dessus pour l'instant.
+ */
+:root {
+  --ink: #1C1A2E;
+  --ink-soft: #58546E;
+  --night: #1C1A2E;
+  --night-2: #3A3459;
+  --ground: #FBF7F1;
+  --surface: #FFFFFF;
+  --surface-raised: #F1E9DC;
+  --border: #E7DECE;
+  --gold: #C98A2E;
+  --gold-strong: #A56B1C;
+  --gold-tint: #F6E6C9;
+  --rent: #2F6E5C;
+  --rent-tint: #DDEFE9;
+  --sale: #8B3A2B;
+  --sale-tint: #F1DFD8;
+  --shadow: 0 1px 2px rgba(28,26,46,.06), 0 8px 24px -12px rgba(28,26,46,.18);
+  --radius-lg: 22px;
+  --radius-md: 14px;
+  --radius-sm: 9px;
+  --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #F3EFE6;
+    --ink-soft: #B9B4C9;
+    --ground: #14121F;
+    --surface: #1E1B2E;
+    --surface-raised: #262239;
+    --border: #322D47;
+    --gold: #E3A94C;
+    --gold-strong: #F2C476;
+    --gold-tint: #3A2E17;
+    --rent: #59B79A;
+    --rent-tint: #16302A;
+    --sale: #D98567;
+    --sale-tint: #3A211B;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"] {
+  --ink: #F3EFE6;
+  --ink-soft: #B9B4C9;
+  --ground: #14121F;
+  --surface: #1E1B2E;
+  --surface-raised: #262239;
+  --border: #322D47;
+  --gold: #E3A94C;
+  --gold-strong: #F2C476;
+  --gold-tint: #3A2E17;
+  --rent: #59B79A;
+  --rent-tint: #16302A;
+  --sale: #D98567;
+  --sale-tint: #3A211B;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 30px -14px rgba(0,0,0,.6);
+}

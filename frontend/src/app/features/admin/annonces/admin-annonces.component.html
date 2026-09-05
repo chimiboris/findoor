@@ -1,0 +1,56 @@
+<app-top-nav />
+
+<div class="wrap admin-wrap">
+  <app-back-button fallback="/admin/tableau-de-bord" />
+  <div class="head-row">
+    <h1>{{ i18n.t('admin.annoncesTitle') }}</h1>
+    <a class="btn btn-gold btn-sm" routerLink="/admin/annonces/nouvelle">+ {{ i18n.t('admin.newAnnonce') }}</a>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" [placeholder]="i18n.t('admin.searchPh')" [ngModel]="recherche()" (ngModelChange)="recherche.set($event)" />
+    <div class="seg">
+      <button type="button" [class.active]="filtreStatut() === 'tous'" (click)="filtreStatut.set('tous')">{{ i18n.t('admin.all') }}</button>
+      <button type="button" [class.active]="filtreStatut() === 'actives'" (click)="filtreStatut.set('actives')">{{ i18n.t('admin.statusActive') }}</button>
+      <button type="button" [class.active]="filtreStatut() === 'suspendues'" (click)="filtreStatut.set('suspendues')">{{ i18n.t('admin.statusSuspended') }}</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="empty-note">…</div>
+  } @else if (!filtrees().length) {
+    <div class="empty-note">{{ i18n.t('admin.noResults') }}</div>
+  } @else {
+    <div class="annonce-list">
+      @for (a of filtrees(); track a.id) {
+        <div class="annonce-row" [class.inactive]="!a.actif" (click)="voir(a)">
+          <div class="a-photo" [style.background]="a.photos?.length ? 'center/cover url(' + mediaUrl(a.photos![0]) + ')' : 'linear-gradient(150deg, var(--night), ' + (a.transaction === 'louer' ? 'var(--rent)' : 'var(--sale)') + ')'"></div>
+          <div class="a-info">
+            <div class="a-title">{{ a.titre }}</div>
+            <div class="a-meta">
+              <span class="badge" [class.badge-suspended]="statutVisibilite(a) !== 'visible'">{{ i18n.t('dash.statut.' + statutVisibilite(a)) }}</span>
+              {{ a.type }} · {{ a.quartier }}, {{ a.ville }} · {{ i18n.t('admin.owner') }} : {{ a.owner }}
+            </div>
+          </div>
+          <div class="a-price mono">{{ prixAffiche(a) }}</div>
+          <div class="a-actions" (click)="$event.stopPropagation()">
+            @if (confirmingDeleteId() === a.id) {
+              <span class="confirm-row">
+                {{ i18n.t('admin.confirmDeleteAnnonce') }}
+                <button class="btn btn-ghost btn-sm" type="button" [disabled]="busyId() === a.id" (click)="confirmerSuppression(a.id)">{{ i18n.t('dash.yes') }}</button>
+                <button class="btn btn-ghost btn-sm" type="button" [disabled]="busyId() === a.id" (click)="annulerSuppression()">{{ i18n.t('dash.no') }}</button>
+              </span>
+            } @else {
+              <button class="btn btn-ghost btn-sm" type="button" [disabled]="busyId() === a.id" (click)="basculer(a)">
+                {{ a.actif ? i18n.t('admin.suspend') : i18n.t('admin.reactivate') }}
+              </button>
+              <button class="btn btn-ghost btn-sm btn-danger" type="button" [disabled]="busyId() === a.id" (click)="demanderSuppression(a.id)">{{ i18n.t('admin.delete') }}</button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<app-site-footer />

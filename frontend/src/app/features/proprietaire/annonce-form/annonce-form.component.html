@@ -1,0 +1,150 @@
+<app-top-nav />
+
+<div class="wrap form-wrap">
+  <app-back-button fallback="/proprietaire/tableau-de-bord" />
+  <h1>{{ editId() ? i18n.t('form.editTitle') : i18n.t('form.newTitle') }}</h1>
+  <p class="subtitle">{{ i18n.t('form.required') }}</p>
+
+  @if (loading()) {
+    <div class="empty-note">{{ i18n.t('form.loading') }}</div>
+  } @else {
+    <form (ngSubmit)="submit()" class="annonce-form">
+      <div class="f-group">
+        <label class="ftitle">{{ i18n.t('form.transaction') }} *</label>
+        <div class="txn-toggle">
+          <button type="button" [class.active]="form().transaction === 'louer'" (click)="setTransaction('louer')">{{ i18n.t('form.rent') }}</button>
+          <button type="button" [class.active]="form().transaction === 'acheter'" (click)="setTransaction('acheter')">{{ i18n.t('form.sell') }}</button>
+        </div>
+      </div>
+
+      <div class="f-group">
+        <label class="ftitle">{{ i18n.t('form.type') }} *</label>
+        <select [ngModel]="form().type" name="type" (ngModelChange)="setType($event)">
+          @for (t of types(); track t) { <option [value]="t">{{ t }}</option> }
+        </select>
+      </div>
+
+      <div class="f-row">
+        <div class="f-group">
+          <label class="ftitle">{{ i18n.t('form.region') }} *</label>
+          <select [ngModel]="form().region" name="region" (ngModelChange)="onRegionChange($event)">
+            <option value="">{{ i18n.t('form.choose') }}</option>
+            @for (r of regions; track r) { <option [value]="r">{{ r }}</option> }
+          </select>
+        </div>
+        <div class="f-group">
+          <label class="ftitle">{{ i18n.t('form.dept') }} *</label>
+          <select [ngModel]="form().departement" name="departement" (ngModelChange)="onDeptChange($event)">
+            <option value="">{{ i18n.t('form.choose') }}</option>
+            @for (d of depts(); track d) { <option [value]="d">{{ d }}</option> }
+          </select>
+        </div>
+        <div class="f-group">
+          <label class="ftitle">{{ i18n.t('form.arr') }} *</label>
+          <select [ngModel]="form().ville" name="ville" (ngModelChange)="patch({ ville: $event })">
+            <option value="">{{ i18n.t('form.choose') }}</option>
+            @for (a of arrs(); track a) { <option [value]="a">{{ a }}</option> }
+          </select>
+        </div>
+      </div>
+
+      <div class="f-group">
+        <label class="ftitle">{{ i18n.t('form.quartier') }} *</label>
+        <input type="text" [placeholder]="i18n.t('form.quartierPh')" [ngModel]="form().quartier" name="quartier" (ngModelChange)="patch({ quartier: $event })" />
+      </div>
+
+      @if (form().transaction === 'louer') {
+        <div class="f-group">
+          <label class="ftitle">{{ i18n.t('form.furnishing') }}</label>
+          <div class="txn-toggle">
+            <button type="button" [class.active]="form().meuble === true" (click)="patch({ meuble: true })">{{ i18n.t('form.furnished') }}</button>
+            <button type="button" [class.active]="form().meuble === false" (click)="patch({ meuble: false })">{{ i18n.t('form.unfurnished') }}</button>
+          </div>
+        </div>
+      }
+
+      <div class="f-row f-row-2">
+        <div class="f-group">
+          <label class="ftitle">{{ estTerrain() ? i18n.t('form.priceM2') : form().transaction === 'louer' ? i18n.t('form.monthlyRent') : i18n.t('form.netPrice') }}</label>
+          <input type="number" min="0" [ngModel]="form().prix" name="prix" (ngModelChange)="patch({ prix: +$event })" />
+          @if (estTerrain() && prixTotalEstime(); as total) {
+            <p class="hint mono">{{ i18n.t('form.hintTotal', { total: fmt(total), surface: form().surface }) }}</p>
+          }
+        </div>
+        <div class="f-group">
+          <label class="ftitle">{{ i18n.t('form.surface') }}</label>
+          <input type="number" min="0" [ngModel]="form().surface" name="surface" (ngModelChange)="patch({ surface: +$event })" />
+        </div>
+      </div>
+
+      @if (!estTerrain() && form().type !== 'Immeuble' && form().type !== 'Local commercial') {
+        <div class="f-row f-row-2">
+          <div class="f-group">
+            <label class="ftitle">{{ i18n.t('form.rooms') }}</label>
+            <input type="number" min="0" [ngModel]="form().pieces" name="pieces" (ngModelChange)="patch({ pieces: $event === '' ? null : +$event })" />
+          </div>
+          <div class="f-group">
+            <label class="ftitle">{{ i18n.t('form.bedrooms') }}</label>
+            <input type="number" min="0" [ngModel]="form().chambres" name="chambres" (ngModelChange)="patch({ chambres: $event === '' ? null : +$event })" />
+          </div>
+        </div>
+      }
+
+      <div class="f-group">
+        <label class="ftitle">{{ i18n.t('form.title') }}</label>
+        <input type="text" [placeholder]="i18n.t('form.titlePh')" [ngModel]="form().titre" name="titre" (ngModelChange)="patch({ titre: $event })" />
+      </div>
+
+      <div class="f-group">
+        <label class="ftitle">{{ i18n.t('form.description') }}</label>
+        <textarea rows="4" [placeholder]="i18n.t('form.descriptionPh')" [ngModel]="form().desc" name="desc" (ngModelChange)="patch({ desc: $event })"></textarea>
+      </div>
+
+      <div class="f-group">
+        <label class="ftitle">{{ i18n.t('form.equipments') }}</label>
+        <div class="equip-input">
+          <input type="text" [placeholder]="i18n.t('form.equipmentsPh')" [ngModel]="nouvelEquip()" name="nouvelEquip" (ngModelChange)="nouvelEquip.set($event)" (keydown.enter)="$event.preventDefault(); ajouterEquip()" />
+          <button type="button" class="btn btn-ghost btn-sm" (click)="ajouterEquip()">{{ i18n.t('form.add') }}</button>
+        </div>
+        @if (form().equip.length) {
+          <div class="chip-row">
+            @for (e of form().equip; track e; let i = $index) {
+              <span class="chip">{{ e }} <button type="button" (click)="retirerEquip(i)" aria-label="Retirer">×</button></span>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="f-group">
+        <label class="ftitle">{{ i18n.t('form.photos') }}</label>
+        <p class="hint">{{ i18n.t('form.photosHint', { count: totalPhotos(), min: PHOTOS_MIN, max: PHOTOS_MAX }) }}</p>
+        <input type="file" accept="image/*" multiple [disabled]="totalPhotos() >= PHOTOS_MAX" (change)="onFilesSelected($event)" />
+        @if (existingPhotos().length || newFiles().length) {
+          <div class="photo-grid">
+            @for (p of existingPhotos(); track p) {
+              <div class="photo-thumb" [style.background-image]="'url(' + mediaUrl(p) + ')'">
+                <button type="button" (click)="retirerPhotoExistante(p)" aria-label="Retirer">×</button>
+              </div>
+            }
+            @for (n of newFiles(); track n.preview; let i = $index) {
+              <div class="photo-thumb" [style.background-image]="'url(' + n.preview + ')'">
+                <button type="button" (click)="retirerNouveauFichier(i)" aria-label="Retirer">×</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-gold" [disabled]="saving()">{{ saving() ? i18n.t('form.saving') : editId() ? i18n.t('form.save') : i18n.t('form.publish') }}</button>
+        <a routerLink="/proprietaire/tableau-de-bord" class="btn btn-ghost">{{ i18n.t('form.cancel') }}</a>
+      </div>
+    </form>
+  }
+</div>
+
+<app-site-footer />

@@ -1,0 +1,22 @@
+<app-top-nav />
+
+<div class="wrap favoris-wrap">
+  <app-back-button fallback="/" />
+  <h1>{{ i18n.t('favoris.title') }}</h1>
+  <p class="subtitle">{{ i18n.t('favoris.subtitle') }}</p>
+
+  @if (loading()) {
+    <div class="empty-note">{{ i18n.t('form.loading') }}</div>
+  } @else if (!annonces().length) {
+    <div class="empty-note">
+      {{ i18n.t('favoris.empty') }}<br />
+      <a class="btn btn-gold btn-sm" style="margin-top:14px" routerLink="/recherche">{{ i18n.t('favoris.browse') }}</a>
+    </div>
+  } @else {
+    <div class="card-grid">
+      @for (a of annonces(); track a.id) { <app-property-card [annonce]="a" /> }
+    </div>
+  }
+</div>
+
+<app-site-footer />

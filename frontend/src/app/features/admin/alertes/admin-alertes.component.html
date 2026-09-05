@@ -1,0 +1,46 @@
+<app-top-nav />
+
+<div class="wrap admin-wrap">
+  <app-back-button fallback="/admin/tableau-de-bord" />
+  <div class="head-row">
+    <h1>{{ i18n.t('admin.alertesTitle') }}</h1>
+    <span class="active-count">{{ actives() }} {{ i18n.t('admin.alertesActive') }}</span>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" [placeholder]="i18n.t('admin.alertesSearchPh')" [ngModel]="recherche()" (ngModelChange)="recherche.set($event)" />
+  </div>
+
+  @if (loading()) {
+    <div class="empty-note">…</div>
+  } @else if (!filtres().length) {
+    <div class="empty-note">{{ i18n.t('admin.noResults') }}</div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ i18n.t('admin.email') }}</th>
+            <th>{{ i18n.t('admin.alertesCriteria') }}</th>
+            <th>{{ i18n.t('admin.status') }}</th>
+            <th>{{ i18n.t('admin.registered') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of filtres(); track a.id) {
+            <tr [class.inactive]="!a.actif">
+              <td>{{ a.email }}</td>
+              <td class="criteria">{{ resumeCriteres(a) }}</td>
+              <td>
+                <span class="badge" [class.badge-off]="!a.actif">{{ a.actif ? i18n.t('admin.alertesActiveState') : i18n.t('admin.alertesUnsubscribed') }}</span>
+              </td>
+              <td class="mono">{{ formatDate(a.dateCreation) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<app-site-footer />

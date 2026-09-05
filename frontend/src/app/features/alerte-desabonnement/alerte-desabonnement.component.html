@@ -1,0 +1,24 @@
+<app-top-nav />
+
+<div class="wrap">
+  <div class="card">
+    @switch (etat()) {
+      @case ('chargement') {
+        <p>{{ i18n.t('unsub.loading') }}</p>
+      }
+      @case ('succes') {
+        <svg class="icon icon-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 12l3 3 5-6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+        <h1>{{ i18n.t('unsub.successTitle') }}</h1>
+        <p>{{ i18n.t('unsub.successBody') }}</p>
+      }
+      @case ('erreur') {
+        <svg class="icon icon-err" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15 9l-6 6M9 9l6 6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+        <h1>{{ i18n.t('unsub.errorTitle') }}</h1>
+        <p>{{ i18n.t('unsub.errorBody') }}</p>
+      }
+    }
+    <a class="btn btn-gold" routerLink="/">{{ i18n.t('unsub.backHome') }}</a>
+  </div>
+</div>
+
+<app-site-footer />

@@ -1,0 +1,59 @@
+<app-top-nav />
+
+<div class="wrap pay-wrap">
+  <app-back-button fallback="/proprietaire/tableau-de-bord" />
+  <h1>{{ i18n.t('payment.title') }}</h1>
+  <p class="subtitle">{{ i18n.t('payment.subtitle') }}</p>
+
+  @if (loading()) {
+    <div class="empty-note">{{ i18n.t('form.loading') }}</div>
+  } @else {
+    @if (abonnement(); as ab) {
+      @if (ab.actif) {
+        <div class="notice notice-active">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <span>{{ i18n.t('payment.currentActive', { date: formatDate(ab.dateAccesExpire!) }) }}</span>
+        </div>
+      }
+    }
+
+    <div class="notice">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>{{ i18n.t('payment.simulationNotice') }}</span>
+    </div>
+
+    <section class="pay-section">
+      <h2>{{ i18n.t('payment.chooseFormula') }}</h2>
+      <div class="formula-grid">
+        @for (f of formules; track f.id) {
+          <button type="button" class="formula-card" [class.active]="formule() === f.id" (click)="formule.set(f.id)">
+            <span class="f-days">{{ f.label }}</span>
+            <span class="f-price mono">{{ fmt(f.prix) }} FCFA</span>
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="pay-section">
+      <h2>{{ i18n.t('payment.chooseMethod') }}</h2>
+      <div class="moyen-grid">
+        @for (m of moyens; track m.id) {
+          <button type="button" class="moyen-card" [class.active]="moyen() === m.id" (click)="moyen.set(m.id)">{{ m.label }}</button>
+        }
+      </div>
+    </section>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <div class="pay-actions">
+      <button type="button" class="btn btn-gold" [disabled]="paying()" (click)="payer()">
+        {{ paying() ? i18n.t('payment.paying') : i18n.t('payment.payBtn', { amount: fmt(formuleChoisie().prix) }) }}
+      </button>
+      <a routerLink="/proprietaire/tableau-de-bord" class="btn btn-ghost">{{ i18n.t('form.cancel') }}</a>
+    </div>
+  }
+</div>
+
+<app-site-footer />

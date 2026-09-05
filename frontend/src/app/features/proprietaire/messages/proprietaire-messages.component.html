@@ -1,0 +1,37 @@
+<app-top-nav />
+
+<div class="wrap msg-wrap">
+  <app-back-button fallback="/proprietaire/tableau-de-bord" />
+  <h1>{{ i18n.t('messages.title') }}</h1>
+  <p class="subtitle">{{ i18n.t('messages.subtitle') }}</p>
+
+  @if (loading()) {
+    <div class="empty-note">{{ i18n.t('form.loading') }}</div>
+  } @else if (!messages().length) {
+    <div class="empty-note">{{ i18n.t('messages.empty') }}</div>
+  } @else {
+    <div class="msg-list">
+      @for (m of messages(); track m.id) {
+        <article class="msg-card" [class.unread]="!m.lu" (click)="marquerLu(m)">
+          <div class="msg-head">
+            <div>
+              <span class="msg-sender">{{ m.expediteurNom }}</span>
+              @if (!m.lu) { <span class="dot" [attr.aria-label]="i18n.t('messages.unread')"></span> }
+            </div>
+            <span class="msg-date mono">{{ formatDate(m.dateCreation) }}</span>
+          </div>
+          <a class="msg-annonce" [routerLink]="['/annonce', m.annonceId]" (click)="$event.stopPropagation()">{{ m.annonceTitre }}</a>
+          <p class="msg-content">{{ m.contenu }}</p>
+          <div class="msg-actions" (click)="$event.stopPropagation()">
+            <a class="btn btn-ghost btn-sm" [href]="'mailto:' + m.expediteurEmail">{{ m.expediteurEmail }}</a>
+            @if (whatsappHref(m); as href) {
+              <a class="btn btn-whatsapp btn-sm" [href]="href" target="_blank" rel="noopener">WhatsApp</a>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>
+
+<app-site-footer />

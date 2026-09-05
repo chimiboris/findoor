@@ -1,0 +1,135 @@
+<app-top-nav />
+
+<div class="hero">
+  <div class="wrap hero-inner">
+    <div>
+      <span class="eyebrow">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        {{ i18n.t('home.badge') }}
+      </span>
+      <h1>{{ i18n.t('home.title.pre') }}<em>{{ i18n.t('home.title.em') }}</em>{{ i18n.t('home.title.post') }}</h1>
+      <p class="lede">{{ i18n.t('home.lede') }}</p>
+    </div>
+    <div class="doorway">
+      <div class="glow"></div>
+      <svg class="house" viewBox="0 0 24 24"><path d="M4 11.5L12 4l8 7.5" fill="none" stroke="#fff" stroke-width="1.6"/><path d="M6 10v9a1 1 0 0 0 1 1h3v-5h4v5h3a1 1 0 0 0 1-1v-9" fill="#fff"/></svg>
+      <div class="frame-label"><span>YAOUNDÉ · DOUALA · KRIBI</span><span>{{ i18n.t('home.doorway.sub') }}</span></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="search-card">
+      <div class="txn-toggle">
+        <button [class.active]="heroTxn() === 'louer'" (click)="setHeroTxn('louer')" type="button">{{ i18n.t('nav.rent') }}</button>
+        <button [class.active]="heroTxn() === 'acheter'" (click)="setHeroTxn('acheter')" type="button">{{ i18n.t('nav.buy') }}</button>
+      </div>
+      <form class="search-grid" (ngSubmit)="search()">
+        <div class="field">
+          <label>{{ i18n.t('home.field.region') }}</label>
+          <select [(ngModel)]="heroRegion" name="heroRegion" (ngModelChange)="onHeroRegionChange()">
+            @for (r of regions; track r) { <option [value]="r">{{ r }}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>{{ i18n.t('home.field.dept') }}</label>
+          <select [(ngModel)]="heroDept" name="heroDept" (ngModelChange)="onHeroDeptChange()">
+            <option value="">{{ i18n.t('home.field.allDepts') }}</option>
+            @for (d of heroDepts(); track d) { <option [value]="d">{{ d }}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>{{ i18n.t('home.field.arr') }}</label>
+          <select [(ngModel)]="heroArr" name="heroArr">
+            <option value="">{{ i18n.t('home.field.allArrs') }}</option>
+            @for (a of heroArrs(); track a) { <option [value]="a">{{ a }}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>{{ i18n.t('home.field.type') }}</label>
+          <select [(ngModel)]="heroType" name="heroType">
+            @for (t of heroTypes(); track t) { <option [value]="t">{{ t }}</option> }
+          </select>
+        </div>
+        <div class="field">
+          <label>{{ i18n.t('home.field.budget') }}</label>
+          <input [(ngModel)]="heroBudget" name="heroBudget" type="text" placeholder="Ex. 200 000" />
+        </div>
+        <button class="btn btn-gold" type="submit">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8"/></svg>
+          {{ i18n.t('home.search') }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="wrap stats">
+  <div class="stats-grid">
+    <div class="stat"><b class="mono">{{ stats().total }}</b><span>{{ i18n.t('home.stat.active') }}</span></div>
+    <div class="stat"><b class="mono">{{ stats().villes }}</b><span>{{ i18n.t('home.stat.cities') }}</span></div>
+    <div class="stat"><b class="mono">{{ stats().verifiedPct }}%</b><span>{{ i18n.t('home.stat.verified') }}</span></div>
+    <div class="stat"><b class="mono">{{ stats().regions }}/10</b><span>{{ i18n.t('home.stat.regions') }}</span></div>
+  </div>
+  <p class="stats-note">{{ i18n.t('home.stat.note') }}</p>
+</div>
+
+<div class="wrap section">
+  <div class="section-head">
+    <div><h2>{{ i18n.t('home.cat.title') }}</h2><p>{{ i18n.t('home.cat.subtitle') }}</p></div>
+  </div>
+  <div class="cat-groups">
+    <div class="cat-panel">
+      <h3><span class="tag-icon rent">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 18v2M21 18v2" stroke="currentColor" stroke-width="1.8"/><path d="M3 12V8a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+      </span>{{ i18n.t('home.cat.rentTitle') }} <span class="tag tag-rent">{{ i18n.t('nav.rent') | uppercase }}</span></h3>
+      <div class="cat-list">
+        <button class="cat-item" (click)="goCategory('louer', { meuble: true })" type="button">{{ i18n.t('home.cat.furnished') }}</button>
+        <button class="cat-item" (click)="goCategory('louer', { meuble: false })" type="button">{{ i18n.t('home.cat.unfurnished') }}</button>
+        <button class="cat-item" (click)="goCategory('louer', { type: 'Chambre' })" type="button">{{ i18n.t('home.cat.room') }}</button>
+        <button class="cat-item" (click)="goCategory('louer', { type: 'Appartement' })" type="button">{{ i18n.t('home.cat.apartment') }}</button>
+      </div>
+    </div>
+    <div class="cat-panel">
+      <h3><span class="tag-icon sale">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 20h18" stroke="currentColor" stroke-width="1.8"/><path d="M4 20L10 5l4 8 3-4 3 11" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+      </span>{{ i18n.t('home.cat.buyTitle') }} <span class="tag tag-sale">{{ i18n.t('nav.buy') | uppercase }}</span></h3>
+      <div class="cat-list">
+        <button class="cat-item" (click)="goCategory('acheter', { type: 'Terrain' })" type="button">{{ i18n.t('home.cat.land') }}</button>
+        <button class="cat-item" (click)="goCategory('acheter', { type: 'Maison' })" type="button">{{ i18n.t('home.cat.house') }}</button>
+        <button class="cat-item" (click)="goCategory('acheter', { type: 'Villa' })" type="button">{{ i18n.t('home.cat.villa') }}</button>
+        <button class="cat-item" (click)="goCategory('acheter', { type: 'Local commercial' })" type="button">{{ i18n.t('home.cat.shop') }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap section no-top">
+  <div class="section-head">
+    <div><h2>{{ i18n.t('home.selection.title') }}</h2><p>{{ i18n.t('home.selection.subtitle') }}</p></div>
+    <a class="see-all" (click)="goResults()">{{ i18n.t('home.selection.seeAll') }}</a>
+  </div>
+  <div class="card-grid">
+    @for (a of featured(); track a.id) { <app-property-card [annonce]="a" /> }
+  </div>
+</div>
+
+<div class="wrap section no-top">
+  <div class="section-head"><div><h2>{{ i18n.t('home.how.title') }}</h2></div></div>
+  <div class="steps">
+    <div class="step"><span class="num">01</span><h3>{{ i18n.t('home.how.step1.title') }}</h3><p>{{ i18n.t('home.how.step1.desc') }}</p></div>
+    <div class="step"><span class="num">02</span><h3>{{ i18n.t('home.how.step2.title') }}</h3><p>{{ i18n.t('home.how.step2.desc') }}</p></div>
+    <div class="step"><span class="num">03</span><h3>{{ i18n.t('home.how.step3.title') }}</h3><p>{{ i18n.t('home.how.step3.desc') }}</p></div>
+  </div>
+</div>
+
+<div class="wrap section no-top">
+  <div class="owner-cta">
+    <div>
+      <h2>{{ i18n.t('home.cta.title') }}</h2>
+      <p>{{ i18n.t('home.cta.desc') }}</p>
+    </div>
+    <div class="cta-side"><a class="btn btn-gold" routerLink="/inscription">{{ i18n.t('home.cta.btn') }}</a></div>
+  </div>
+</div>
+
+<app-site-footer />

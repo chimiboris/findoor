@@ -1,6 +1,7 @@
 package com.findoor.backend.domain;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,6 +53,15 @@ public class User {
     @Builder.Default
     private boolean emailVerifie = false;
 
+    /**
+     * Jusqu'à quand l'abonnement (phase 4 — paiement par période, pas par annonce) donne accès à la
+     * publication : tant que cette date n'est pas dépassée, le propriétaire peut publier de nouvelles
+     * annonces et TOUTES ses annonces restent visibles publiquement. Null = jamais abonné. Un admin
+     * peut la modifier directement (voir AdminService) pour couvrir un paiement en échec côté réseau.
+     */
+    @Column(name = "date_acces_expire")
+    private LocalDate dateAccesExpire;
+
     @Column(name = "date_creation", nullable = false, updatable = false)
     private LocalDateTime dateCreation;
 
@@ -68,5 +78,9 @@ public class User {
     @PreUpdate
     void onUpdate() {
         this.dateMaj = LocalDateTime.now();
+    }
+
+    public boolean abonnementActif() {
+        return dateAccesExpire != null && !dateAccesExpire.isBefore(LocalDate.now());
     }
 }

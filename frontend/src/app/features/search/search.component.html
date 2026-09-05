@@ -1,0 +1,121 @@
+<app-top-nav />
+
+<div class="wrap"><app-back-button fallback="/" /></div>
+
+<div class="wrap search-layout">
+  <aside class="filters">
+    <h3>{{ i18n.t('search.title') }}</h3>
+
+    <div class="f-group">
+      <label class="ftitle">{{ i18n.t('search.transaction') }}</label>
+      <div class="txn-toggle">
+        <button [class.active]="filters().transaction === 'louer'" (click)="setTxn('louer')" type="button">{{ i18n.t('nav.rent') }}</button>
+        <button [class.active]="filters().transaction === 'acheter'" (click)="setTxn('acheter')" type="button">{{ i18n.t('nav.buy') }}</button>
+      </div>
+    </div>
+
+    <div class="f-group">
+      <label class="ftitle">{{ i18n.t('search.region') }}</label>
+      <select [ngModel]="filters().region" (ngModelChange)="onRegionChange($event)">
+        <option value="">{{ i18n.t('search.allRegions') }}</option>
+        @for (r of regions; track r) { <option [value]="r">{{ r }}</option> }
+      </select>
+    </div>
+
+    <div class="f-group">
+      <label class="ftitle">{{ i18n.t('search.dept') }}</label>
+      <select [ngModel]="filters().departement" (ngModelChange)="onDeptChange($event)">
+        <option value="">{{ i18n.t('search.allDepts') }}</option>
+        @for (d of depts(); track d) { <option [value]="d">{{ d }}</option> }
+      </select>
+    </div>
+
+    <div class="f-group">
+      <label class="ftitle">{{ i18n.t('search.arr') }}</label>
+      <select [ngModel]="filters().arrondissement" (ngModelChange)="onArrChange($event)">
+        <option value="">{{ i18n.t('search.allArrs') }}</option>
+        @for (a of arrs(); track a) { <option [value]="a">{{ a }}</option> }
+      </select>
+    </div>
+
+    <div class="f-group">
+      <label class="ftitle">{{ i18n.t('search.quartier') }}</label>
+      <input type="text" [placeholder]="i18n.t('search.quartierPh')" [ngModel]="filters().quartier" (ngModelChange)="onQuartierChange($event)" />
+    </div>
+
+    @if (filters().transaction === 'louer') {
+      <div class="f-group">
+        <label class="ftitle">{{ i18n.t('search.furnishing') }}</label>
+        <div class="chk-row"><input type="checkbox" id="f-meuble-oui" [checked]="filters().meubleOui" (change)="toggleMeuble('oui')" /><label for="f-meuble-oui">{{ i18n.t('search.furnished') }}</label></div>
+        <div class="chk-row"><input type="checkbox" id="f-meuble-non" [checked]="filters().meubleNon" (change)="toggleMeuble('non')" /><label for="f-meuble-non">{{ i18n.t('search.unfurnished') }}</label></div>
+      </div>
+    }
+
+    <div class="f-group">
+      <label class="ftitle">{{ i18n.t('search.type') }}</label>
+      @for (t of types(); track t) {
+        <div class="chk-row">
+          <input type="checkbox" [id]="'ft-' + t" [checked]="filters().types.includes(t)" (change)="toggleType(t)" />
+          <label [for]="'ft-' + t">{{ t }}</label>
+        </div>
+      }
+    </div>
+
+    <div class="f-group">
+      <label class="ftitle">{{ i18n.t('search.budget') }}</label>
+      <div class="range-row">
+        <input type="text" [placeholder]="i18n.t('search.min')" [ngModel]="filters().prixMin" (ngModelChange)="setMin($event)" />
+        <input type="text" [placeholder]="i18n.t('search.max')" [ngModel]="filters().prixMax" (ngModelChange)="setMax($event)" />
+      </div>
+    </div>
+
+    <button class="btn btn-ghost btn-sm btn-block" (click)="reset()" type="button">{{ i18n.t('search.reset') }}</button>
+
+    <div class="alert-block">
+      @if (alerteSent()) {
+        <p class="toast toast-success">{{ i18n.t('search.alertSent') }}</p>
+      } @else if (!showAlerteForm()) {
+        <button class="btn btn-gold btn-sm btn-block" (click)="ouvrirAlerteForm()" type="button">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22z" fill="currentColor"/><path d="M18 16v-5a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          {{ i18n.t('search.alertCreate') }}
+        </button>
+      } @else {
+        <form class="alert-form" (ngSubmit)="creerAlerte()">
+          <label class="ftitle">{{ i18n.t('search.alertLabel') }}</label>
+          <input type="email" [placeholder]="i18n.t('search.alertEmailPh')" [ngModel]="alerteEmail()" (ngModelChange)="alerteEmail.set($event)" name="alerteEmail" />
+          @if (alerteError()) {
+            <p class="error">{{ alerteError() }}</p>
+          }
+          <div class="alert-form-actions">
+            <button type="submit" class="btn btn-gold btn-sm" [disabled]="sendingAlerte()">{{ sendingAlerte() ? i18n.t('search.alertSending') : i18n.t('search.alertConfirm') }}</button>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="annulerAlerteForm()">{{ i18n.t('form.cancel') }}</button>
+          </div>
+        </form>
+      }
+    </div>
+  </aside>
+
+  <div>
+    <div class="results-top">
+      <div class="results-count"><b class="mono">{{ results().length }}</b> {{ i18n.t('search.found') }}</div>
+      <div class="sort-row">
+        {{ i18n.t('search.sortBy') }}
+        <select [ngModel]="filters().sort" (ngModelChange)="setSort($event)">
+          <option value="pertinence">{{ i18n.t('search.sortRelevance') }}</option>
+          <option value="prix-asc">{{ i18n.t('search.sortPriceAsc') }}</option>
+          <option value="prix-desc">{{ i18n.t('search.sortPriceDesc') }}</option>
+        </select>
+      </div>
+    </div>
+
+    @if (results().length) {
+      <div class="results-grid">
+        @for (a of results(); track a.id) { <app-property-card [annonce]="a" /> }
+      </div>
+    } @else {
+      <div class="empty-note">{{ i18n.t('search.empty') }}<br />{{ i18n.t('search.emptyHint') }}</div>
+    }
+  </div>
+</div>
+
+<app-site-footer />

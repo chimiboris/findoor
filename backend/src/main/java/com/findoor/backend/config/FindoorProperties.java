@@ -10,7 +10,7 @@ public record FindoorProperties(Jwt jwt, Cors cors, Storage storage, Payment pay
 
     public record Cors(String allowedOrigins) {}
 
-    public record Storage(String endpoint, String bucket, String accessKey, String secretKey) {}
+    public record Storage(String endpoint, String bucket, String accessKey, String secretKey, String localDir) {}
 
     public record Payment(String provider, CinetPay cinetpay) {
         public record CinetPay(String siteId, String apiKey, String notifyUrl, String returnUrl) {}

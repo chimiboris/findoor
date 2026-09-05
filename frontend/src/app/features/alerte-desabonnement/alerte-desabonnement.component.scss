@@ -1,0 +1,15 @@
+:host { display: block; font-family: var(--font-body); background: var(--ground); color: var(--ink); min-height: 100vh; }
+
+.wrap { max-width: 480px; margin: 0 auto; padding: 80px 28px; }
+.card {
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px 30px; box-shadow: var(--shadow);
+}
+.icon { width: 52px; height: 52px; margin-bottom: 6px; }
+.icon-ok { color: #0f9b6b; }
+.icon-err { color: var(--sale); }
+h1 { font-family: var(--font-display); font-size: 1.3rem; margin: 0; color: var(--ink); }
+p { color: var(--ink-soft); margin: 0 0 10px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; padding: 10px 22px; font-weight: 700; font-size: .9rem; text-decoration: none; font-family: var(--font-body); }
+.btn-gold { background: var(--gold); color: #fff; }
+.btn-gold:hover { background: var(--gold-strong); }

@@ -1,0 +1,47 @@
+:host { display: block; font-family: var(--font-body); background: var(--ground); color: var(--ink); min-height: 100vh; }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+@media (max-width: 720px) { .wrap { padding: 0 18px; } }
+
+.admin-wrap { padding-bottom: 70px; }
+.admin-wrap h1 { font-family: var(--font-display); font-size: 1.6rem; margin: 0; color: var(--ink); }
+.head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 6px 0 20px; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.tab {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 8px 16px;
+  font-size: .84rem; font-weight: 700; color: var(--ink-soft); cursor: pointer; font-family: var(--font-body);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.tab:hover { border-color: var(--gold); }
+.tab.active { background: var(--ink); border-color: var(--ink); color: #fff; }
+.tab .count { font-family: var(--font-mono); font-size: .78rem; opacity: .75; }
+
+.error { color: var(--sale); font-size: .85rem; margin: 0 0 14px; }
+.empty-note { text-align: center; padding: 60px 20px; color: var(--ink-soft); }
+
+.avis-cards { display: flex; flex-direction: column; gap: 14px; }
+.avis-card { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); padding: 16px 18px; }
+.avis-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.a-name { font-weight: 700; color: var(--ink); }
+.a-annonce { font-size: .8rem; color: var(--ink-soft); text-decoration: none; }
+.a-annonce:hover { color: var(--gold-strong); text-decoration: underline; }
+.a-stars { display: inline-flex; gap: 2px; flex-shrink: 0; }
+.a-stars svg { width: 15px; height: 15px; color: var(--gold-strong); }
+.a-comment { margin: 0 0 10px; color: var(--ink); font-size: .92rem; }
+.avis-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.a-meta { font-size: .78rem; color: var(--ink-soft); }
+
+.badge { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.badge-pending { background: color-mix(in srgb, var(--gold) 20%, transparent); color: var(--gold-strong); }
+.badge-published { background: color-mix(in srgb, var(--rent) 18%, transparent); color: var(--rent); }
+.badge-rejected { background: color-mix(in srgb, var(--sale) 18%, transparent); color: var(--sale); }
+
+.avis-card-actions { display: flex; gap: 8px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 999px; border: 1px solid var(--border); padding: 7px 14px; font-weight: 700; font-size: .82rem; cursor: pointer; font-family: var(--font-body); background: transparent; color: var(--ink); }
+.btn:hover { border-color: var(--gold); color: var(--gold); }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn-sm { padding: 6px 12px; font-size: .8rem; }
+.btn-gold { background: var(--gold); color: #fff; border-color: transparent; }
+.btn-gold:hover { background: var(--gold-strong); color: #fff; }
+.btn-danger:hover { border-color: var(--sale); color: var(--sale); }

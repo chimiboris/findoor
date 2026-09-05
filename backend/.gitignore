@@ -4,6 +4,10 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# Stockage local des photos d'annonces (voir FileStorageService / findoor.storage.local-dir) —
+# contenu généré/uploadé, jamais versionné ; en production ce sera un bucket S3/MinIO.
+uploads/
+
 ### STS ###
 .apt_generated
 .classpath

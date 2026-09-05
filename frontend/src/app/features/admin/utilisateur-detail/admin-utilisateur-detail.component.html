@@ -1,0 +1,191 @@
+<app-top-nav />
+
+<div class="wrap form-wrap">
+  <app-back-button fallback="/admin/utilisateurs" />
+  <h1>{{ !editId() ? i18n.t('admin.newUserTitle') : mode() === 'edition' ? i18n.t('admin.editUserTitle') : form().prenom + ' ' + form().nom }}</h1>
+  @if (!editId() || mode() === 'edition') {
+    <p class="subtitle">{{ i18n.t('form.required') }}</p>
+  }
+
+  @if (editId()) {
+    <div class="status-panel">
+      <span class="badge" [class.badge-suspended]="!actif()">{{ actif() ? i18n.t('admin.statusActive') : i18n.t('admin.statusSuspended') }}</span>
+      @if (form().role === 'PROPRIETAIRE') {
+        <span class="badge" [class.badge-abonnement]="abonnementActif()" [class.badge-suspended]="!abonnementActif()">
+          {{ abonnementActif() ? i18n.t('admin.subscriptionActive') : i18n.t('admin.subscriptionInactive') }}
+        </span>
+      }
+      @if (dateCreation()) {
+        <span class="hint-inline">{{ i18n.t('admin.registered') }} {{ formatDate(dateCreation()!) }}</span>
+      }
+      <span class="spacer"></span>
+      @if (estSoiMeme()) {
+        <span class="hint-inline">{{ i18n.t('admin.thisIsYou') }}</span>
+      } @else if (confirmingDelete()) {
+        <span class="confirm-row">
+          {{ i18n.t('admin.confirmDeleteUser') }}
+          <button class="btn btn-ghost btn-sm" type="button" [disabled]="busy()" (click)="confirmerSuppression()">{{ i18n.t('dash.yes') }}</button>
+          <button class="btn btn-ghost btn-sm" type="button" [disabled]="busy()" (click)="annulerSuppression()">{{ i18n.t('dash.no') }}</button>
+        </span>
+      } @else {
+        @if (mode() === 'vue') {
+          <button class="btn btn-gold btn-sm" type="button" (click)="modifier()">{{ i18n.t('admin.edit') }}</button>
+        }
+        <button class="btn btn-ghost btn-sm" type="button" [disabled]="busy()" (click)="basculer()">{{ actif() ? i18n.t('admin.suspend') : i18n.t('admin.reactivate') }}</button>
+        <button class="btn btn-ghost btn-sm btn-danger" type="button" [disabled]="busy()" (click)="demanderSuppression()">{{ i18n.t('admin.delete') }}</button>
+      }
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="empty-note">{{ i18n.t('form.loading') }}</div>
+  } @else if (mode() === 'vue') {
+    <div class="vue-card">
+      <div class="vue-row"><span class="vue-label">{{ i18n.t('auth.email') }}</span><span class="vue-value">{{ form().email }}</span></div>
+      <div class="vue-row"><span class="vue-label">{{ i18n.t('auth.phone') }}</span><span class="vue-value mono">{{ form().telephone }}</span></div>
+      <div class="vue-row"><span class="vue-label">{{ i18n.t('admin.role') }}</span><span class="vue-value">{{ roleLabel() }}</span></div>
+      @if (form().role === 'PROPRIETAIRE') {
+        <div class="vue-row">
+          <span class="vue-label">{{ i18n.t('admin.subscriptionUntil') }}</span>
+          <span class="vue-value">{{ form().dateAccesExpire ? formatDate(form().dateAccesExpire) : i18n.t('admin.noSubscription') }}</span>
+        </div>
+      }
+    </div>
+  } @else {
+    <form (ngSubmit)="submit()" class="annonce-form">
+      <div class="f-row f-row-2">
+        <div class="f-group">
+          <label class="ftitle">{{ i18n.t('admin.firstName') }} *</label>
+          <input type="text" [ngModel]="form().prenom" name="prenom" (ngModelChange)="patch({ prenom: $event })" />
+        </div>
+        <div class="f-group">
+          <label class="ftitle">{{ i18n.t('admin.lastName') }} *</label>
+          <input type="text" [ngModel]="form().nom" name="nom" (ngModelChange)="patch({ nom: $event })" />
+        </div>
+      </div>
+
+      <div class="f-group">
+        <label class="ftitle">{{ i18n.t('auth.email') }} *</label>
+        <input type="email" [ngModel]="form().email" name="email" (ngModelChange)="patch({ email: $event })" />
+      </div>
+
+      <div class="f-group">
+        <label class="ftitle">{{ i18n.t('auth.phone') }} *</label>
+        <input type="text" placeholder="+237 6XX XX XX XX" [ngModel]="form().telephone" name="telephone" (ngModelChange)="patch({ telephone: $event })" />
+      </div>
+
+      <div class="f-group">
+        <label class="ftitle">{{ i18n.t('admin.role') }} *</label>
+        <select [ngModel]="form().role" name="role" (ngModelChange)="patch({ role: $event })">
+          <option value="VISITEUR">{{ i18n.t('admin.roleVisiteur') }}</option>
+          <option value="PROPRIETAIRE">{{ i18n.t('admin.roleProprietaire') }}</option>
+          <option value="ADMIN">{{ i18n.t('admin.roleAdmin') }}</option>
+        </select>
+      </div>
+
+      <div class="f-group">
+        <label class="ftitle">{{ i18n.t('admin.subscriptionUntil') }}</label>
+        <input type="date" [ngModel]="form().dateAccesExpire" name="dateAccesExpire" (ngModelChange)="patch({ dateAccesExpire: $event })" />
+        <p class="hint">{{ i18n.t('admin.subscriptionHint') }}</p>
+      </div>
+
+      @if (!editId()) {
+        <div class="f-group">
+          <label class="ftitle">{{ i18n.t('auth.password') }} *</label>
+          <div class="password-wrap">
+            <input [type]="showPassword() ? 'text' : 'password'" autocomplete="new-password" [ngModel]="form().motDePasse" name="motDePasse" (ngModelChange)="patch({ motDePasse: $event })" />
+            <button type="button" class="eye-btn" (click)="showPassword.set(!showPassword())" [attr.aria-label]="showPassword() ? i18n.t('auth.hidePassword') : i18n.t('auth.showPassword')">
+              @if (showPassword()) {
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7c2.1 0 3.9.6 5.4 1.4M23 12s-1.6 2.9-4.4 4.9M9.9 9.9a3 3 0 0 0 4.2 4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 3l18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              } @else {
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+              }
+            </button>
+          </div>
+          <p class="hint">{{ i18n.t('admin.passwordHint') }}</p>
+        </div>
+        <div class="f-group">
+          <label class="ftitle">{{ i18n.t('auth.confirmPassword') }} *</label>
+          <div class="password-wrap">
+            <input [type]="showConfirm() ? 'text' : 'password'" autocomplete="new-password" [ngModel]="form().confirmerMotDePasse" name="confirmerMotDePasse" (ngModelChange)="patch({ confirmerMotDePasse: $event })" />
+            <button type="button" class="eye-btn" (click)="showConfirm.set(!showConfirm())" [attr.aria-label]="showConfirm() ? i18n.t('auth.hidePassword') : i18n.t('auth.showPassword')">
+              @if (showConfirm()) {
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7c2.1 0 3.9.6 5.4 1.4M23 12s-1.6 2.9-4.4 4.9M9.9 9.9a3 3 0 0 0 4.2 4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 3l18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              } @else {
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+              }
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="f-group">
+          <label class="ftitle">{{ i18n.t('admin.newPasswordOptional') }}</label>
+          <div class="password-wrap">
+            <input [type]="showNewPassword() ? 'text' : 'password'" autocomplete="new-password" [ngModel]="form().nouveauMotDePasse" name="nouveauMotDePasse" (ngModelChange)="patch({ nouveauMotDePasse: $event })" />
+            <button type="button" class="eye-btn" (click)="showNewPassword.set(!showNewPassword())" [attr.aria-label]="showNewPassword() ? i18n.t('auth.hidePassword') : i18n.t('auth.showPassword')">
+              @if (showNewPassword()) {
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7c2.1 0 3.9.6 5.4 1.4M23 12s-1.6 2.9-4.4 4.9M9.9 9.9a3 3 0 0 0 4.2 4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 3l18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              } @else {
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+              }
+            </button>
+          </div>
+          <p class="hint">{{ i18n.t('admin.newPasswordHint') }}</p>
+        </div>
+        @if (form().nouveauMotDePasse) {
+          <div class="f-group">
+            <label class="ftitle">{{ i18n.t('auth.confirmNewPassword') }} *</label>
+            <div class="password-wrap">
+              <input [type]="showConfirmNew() ? 'text' : 'password'" autocomplete="new-password" [ngModel]="form().confirmerNouveauMotDePasse" name="confirmerNouveauMotDePasse" (ngModelChange)="patch({ confirmerNouveauMotDePasse: $event })" />
+              <button type="button" class="eye-btn" (click)="showConfirmNew.set(!showConfirmNew())" [attr.aria-label]="showConfirmNew() ? i18n.t('auth.hidePassword') : i18n.t('auth.showPassword')">
+                @if (showConfirmNew()) {
+                  <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7c2.1 0 3.9.6 5.4 1.4M23 12s-1.6 2.9-4.4 4.9M9.9 9.9a3 3 0 0 0 4.2 4.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 3l18 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                } @else {
+                  <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+                }
+              </button>
+            </div>
+          </div>
+        }
+      }
+
+      @if (error()) {
+        <p class="error">{{ error() }}</p>
+      }
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-gold" [disabled]="saving()">{{ saving() ? i18n.t('form.saving') : editId() ? i18n.t('form.save') : i18n.t('admin.createUserBtn') }}</button>
+        <button type="button" class="btn btn-ghost" (click)="annulerEdition()">{{ i18n.t('form.cancel') }}</button>
+      </div>
+    </form>
+  }
+
+  @if (editId()) {
+    <section class="annonces-section">
+      <h2>{{ i18n.t('admin.userAnnonces') }}</h2>
+      @if (annoncesLoading()) {
+        <div class="empty-note">{{ i18n.t('form.loading') }}</div>
+      } @else if (!annonces().length) {
+        <div class="empty-note">{{ i18n.t('admin.noAnnoncesForUser') }}</div>
+      } @else {
+        <div class="annonce-list">
+          @for (a of annonces(); track a.id) {
+            <a class="annonce-row" [class.inactive]="!a.actif" [routerLink]="['/admin/annonces', a.id]">
+              <div class="a-photo" [style.background]="a.photos?.length ? 'center/cover url(' + mediaUrl(a.photos![0]) + ')' : 'linear-gradient(150deg, var(--night), ' + (a.transaction === 'louer' ? 'var(--rent)' : 'var(--sale)') + ')'"></div>
+              <div class="a-info">
+                <div class="a-title">{{ a.titre }}</div>
+                <div class="a-meta">
+                  <span class="badge" [class.badge-suspended]="statutVisibilite(a) !== 'visible'">{{ i18n.t('dash.statut.' + statutVisibilite(a)) }}</span>
+                  {{ a.type }} · {{ a.quartier }}, {{ a.ville }}
+                </div>
+              </div>
+              <div class="a-price mono">{{ prixAffiche(a) }}</div>
+            </a>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>
+
+<app-site-footer />

@@ -1,0 +1,93 @@
+<app-top-nav />
+
+<div class="wrap dash-wrap">
+  <app-back-button fallback="/" />
+  <div class="dash-head">
+    <div>
+      <h1>{{ i18n.t('dash.title') }}</h1>
+      <p class="subtitle">{{ i18n.t('dash.greeting', { name: session.user()?.prenom ?? '' }) }}</p>
+    </div>
+    <div class="dash-head-actions">
+      <a class="btn btn-ghost" routerLink="/proprietaire/messages">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        {{ i18n.t('dash.messages') }}
+        @if (messagesNonLus() > 0) { <span class="badge-count">{{ messagesNonLus() }}</span> }
+      </a>
+      <a class="btn btn-gold" routerLink="/proprietaire/annonces/nouvelle">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        {{ i18n.t('dash.publishNew') }}
+      </a>
+    </div>
+  </div>
+
+  @if (abonnement(); as ab) {
+    <div class="subscription-banner" [class.active]="ab.actif">
+      @if (ab.actif) {
+        <span>{{ i18n.t('dash.subscriptionActive', { date: formatDate(ab.dateAccesExpire!) }) }}</span>
+        <a class="btn btn-ghost btn-sm" routerLink="/proprietaire/abonnement">{{ i18n.t('dash.renew') }}</a>
+      } @else {
+        <span>{{ ab.dateAccesExpire ? i18n.t('dash.subscriptionExpired', { date: formatDate(ab.dateAccesExpire) }) : i18n.t('dash.subscriptionNone') }}</span>
+        <a class="btn btn-gold btn-sm" routerLink="/proprietaire/abonnement">{{ i18n.t('dash.subscribe') }}</a>
+      }
+    </div>
+  }
+
+  <div class="stats-row">
+    <div class="stat-tile">
+      <span class="stat-value mono">{{ stats().total }}</span>
+      <span class="stat-label">{{ i18n.t('dash.statTotal') }}</span>
+    </div>
+    <div class="stat-tile">
+      <span class="stat-value mono">{{ stats().louer }}</span>
+      <span class="stat-label">{{ i18n.t('dash.statRent') }}</span>
+    </div>
+    <div class="stat-tile">
+      <span class="stat-value mono">{{ stats().acheter }}</span>
+      <span class="stat-label">{{ i18n.t('dash.statSale') }}</span>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="empty-note">{{ i18n.t('dash.loading') }}</div>
+  } @else if (!annonces().length) {
+    <div class="empty-note">
+      {{ i18n.t('dash.empty') }}<br />
+      <a class="btn btn-ghost btn-sm" style="margin-top:14px" routerLink="/proprietaire/annonces/nouvelle">{{ i18n.t('dash.publishFirst') }}</a>
+    </div>
+  } @else {
+    <div class="annonce-list">
+      @for (a of annonces(); track a.id) {
+        <div class="annonce-row">
+          <div class="a-photo" [style.background]="a.photos?.length ? 'center/cover url(' + mediaUrl(a.photos![0]) + ')' : 'linear-gradient(150deg, var(--night), ' + (a.transaction === 'louer' ? 'var(--rent)' : 'var(--sale)') + ')'"></div>
+          <div class="a-info">
+            <div class="a-title">{{ a.titre }}</div>
+            <div class="a-meta">
+              <span class="badge" [class.badge-louer]="a.transaction === 'louer'" [class.badge-acheter]="a.transaction === 'acheter'">
+                {{ a.transaction === 'louer' ? i18n.t('detail.rent') : i18n.t('detail.sale') }}
+              </span>
+              <span class="badge" [class.badge-visible]="statutVisibilite(a) === 'visible'" [class.badge-off]="statutVisibilite(a) !== 'visible'">
+                {{ i18n.t('dash.statut.' + statutVisibilite(a)) }}
+              </span>
+              {{ a.type }} · {{ a.quartier }}, {{ a.ville }}
+            </div>
+          </div>
+          <div class="a-price mono">{{ prixAffiche(a) }}</div>
+          <div class="a-actions">
+            @if (confirmingDeleteId() === a.id) {
+              <span class="confirm-row">
+                {{ i18n.t('dash.confirmDelete') }}
+                <button class="btn btn-ghost btn-sm" type="button" [disabled]="deleting()" (click)="confirmerSuppression(a.id)">{{ i18n.t('dash.yes') }}</button>
+                <button class="btn btn-ghost btn-sm" type="button" [disabled]="deleting()" (click)="annulerSuppression()">{{ i18n.t('dash.no') }}</button>
+              </span>
+            } @else {
+              <button class="btn btn-ghost btn-sm" type="button" (click)="editer(a)">{{ i18n.t('dash.edit') }}</button>
+              <button class="btn btn-ghost btn-sm btn-danger" type="button" (click)="demanderSuppression(a.id)">{{ i18n.t('dash.delete') }}</button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<app-site-footer />

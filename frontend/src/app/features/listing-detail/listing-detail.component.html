@@ -1,0 +1,239 @@
+<app-top-nav />
+
+@if (justPublished()) {
+  <div class="wrap">
+    <div class="published-banner">
+      <span>{{ i18n.t('detail.justPublished') }}</span>
+      <button type="button" (click)="fermerBanniere()" aria-label="Fermer">×</button>
+    </div>
+  </div>
+}
+
+@if (annonce(); as l) {
+  <div class="wrap fiche-wrap">
+    <a class="back-link" (click)="goBack()">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" fill="none" stroke="currentColor" stroke-width="2.6"/></svg>
+      {{ i18n.t('detail.back') }}
+    </a>
+    <div class="crumb"><b>{{ l.transaction === 'louer' ? i18n.t('detail.rent') : i18n.t('detail.sale') }}</b> · {{ l.ville }} · {{ l.type }}</div>
+
+    <div class="gallery">
+      @if (hasPhotos()) {
+        <button type="button" class="main-shot" [style.background-image]="'url(' + mediaUrl(l.photos![selectedPhoto()]) + ')'" style="background-size:cover;background-position:center">
+          <span class="count-chip">{{ selectedPhoto() + 1 }} / {{ l.photos!.length }}</span>
+        </button>
+        <div class="thumbs" [class.thumbs-scroll]="l.photos!.length > 3">
+          @for (p of l.photos!; track p; let i = $index) {
+            <button type="button" class="thumb" [class.active]="i === selectedPhoto()" [style.background-image]="'url(' + mediaUrl(p) + ')'" style="background-size:cover;background-position:center" (click)="choisirPhoto(i)" [attr.aria-label]="'Photo ' + (i + 1)"></button>
+          }
+        </div>
+      } @else {
+        <div class="main-shot" [style.background]="photoGradient()">
+          <svg viewBox="0 0 24 24" [innerHTML]="iconPath()"></svg>
+        </div>
+      }
+    </div>
+
+    <div class="fiche-layout">
+      <div>
+        <div class="fiche-head">
+          <div>
+            <h1>{{ l.titre }}</h1>
+            <div class="fiche-loc">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 22s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+              {{ l.quartier }}, {{ l.ville }}
+            </div>
+          </div>
+          <div class="fiche-head-right">
+            <div class="fiche-price">{{ price().big }}<br /><small>{{ price().small }}</small></div>
+            <button type="button" class="fav-toggle" [class.active]="estFavori()" (click)="toggleFavori()" [attr.aria-label]="estFavori() ? i18n.t('card.removeFavori') : i18n.t('card.addFavori')">
+              <svg viewBox="0 0 24 24" [attr.fill]="estFavori() ? 'currentColor' : 'none'"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.2 2 4.5 5.6 4c2-.3 3.9.5 5.1 2.2C11.9 4.5 13.8 3.7 15.8 4c3.6.5 5.2 4.2 3.6 7.7C21.5 16.4 12 21 12 21z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              {{ estFavori() ? i18n.t('detail.favoriRemove') : i18n.t('detail.favoriAdd') }}
+            </button>
+          </div>
+        </div>
+
+        <div class="specs-bar">
+          <span class="spec">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="6" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 9v3M11 9v3M15 9v3" stroke="currentColor" stroke-width="1.6"/></svg>
+            {{ i18n.t('detail.surface') }} <b>{{ l.surface }} m²</b>
+          </span>
+          @if (l.pieces) {
+            <span class="spec">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M11 4v16" stroke="currentColor" stroke-width="1.6"/></svg>
+              {{ i18n.t('detail.rooms') }} <b>{{ l.pieces }}</b>
+            </span>
+          }
+          @if (l.chambres) {
+            <span class="spec">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 18v2M21 18v2" stroke="currentColor" stroke-width="1.6"/></svg>
+              {{ i18n.t('detail.bedrooms') }} <b>{{ l.chambres }}</b>
+            </span>
+          }
+          @if (l.transaction === 'louer') {
+            <span class="spec">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+              {{ l.meuble ? i18n.t('detail.furnished') : i18n.t('detail.unfurnished') }}
+            </span>
+          }
+          @if (l.type === 'Terrain') {
+            <span class="spec">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+              {{ i18n.t('detail.landTitle') }}
+            </span>
+          }
+        </div>
+
+        <div class="fiche-block">
+          <h2>{{ i18n.t('detail.description') }}</h2>
+          <p>{{ l.desc }}</p>
+        </div>
+
+        <div class="fiche-block">
+          <h2>{{ i18n.t('detail.equipments') }}</h2>
+          <div class="amenities">
+            @for (e of l.equip; track e) {
+              <div class="amenity">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                {{ e }}
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="fiche-block">
+          <h2>{{ i18n.t('detail.location') }}</h2>
+          <app-property-map [lat]="l.latitude" [lng]="l.longitude" [label]="l.quartier + ', ' + l.ville" />
+        </div>
+      </div>
+
+      <aside class="contact-card">
+        <div class="owner-row">
+          <div class="avatar">{{ l.initials }}</div>
+          <div>
+            <div class="owner-name">{{ l.owner }}</div>
+            <span class="verified">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+              {{ i18n.t('detail.verified') }}
+            </span>
+          </div>
+        </div>
+        <div class="phone-reveal">
+          <span>{{ phoneRevealed() ? (l.ownerTelephone || i18n.t('detail.noPhone')) : '+237 6•• •• •• ••' }}</span>
+          <button class="btn btn-ghost btn-sm" (click)="revealPhone()" type="button">{{ i18n.t('detail.show') }}</button>
+        </div>
+        <div class="contact-stack">
+          <a class="btn btn-whatsapp btn-block" [href]="whatsappHref()" target="_blank" rel="noopener">
+            <svg class="icon icon-whatsapp" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.26-.46-2.39-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.06 2.87 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35z"/>
+              <path d="M12 2C6.49 2 2 6.48 2 12c0 1.76.47 3.48 1.35 5L2 22l5.15-1.35a9.96 9.96 0 0 0 4.85 1.24h.01c5.51 0 9.99-4.48 9.99-10S17.51 2 12 2zm0 18.3a8.27 8.27 0 0 1-4.22-1.15l-.3-.18-3.06.8.82-2.98-.2-.31A8.28 8.28 0 0 1 3.7 12c0-4.58 3.72-8.3 8.3-8.3 2.22 0 4.3.86 5.87 2.43A8.24 8.24 0 0 1 20.3 12c0 4.58-3.72 8.3-8.3 8.3z"/>
+            </svg>
+            {{ i18n.t('detail.whatsapp') }}
+          </a>
+          <button class="btn btn-ghost btn-block" (click)="ouvrirFormulaireMessage()" type="button">
+            <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+            {{ i18n.t('detail.message') }}
+          </button>
+        </div>
+        @if (messageSent()) {
+          <p class="toast toast-success">{{ i18n.t('detail.messageSent') }}</p>
+        }
+        @if (showMessageForm()) {
+          <form class="message-form" (ngSubmit)="envoyerMessage()">
+            <input type="text" [placeholder]="i18n.t('detail.messageName')" [ngModel]="messageForm().nom" name="msgNom" (ngModelChange)="patchMessage({ nom: $event })" />
+            <input type="email" [placeholder]="i18n.t('detail.messageEmail')" [ngModel]="messageForm().email" name="msgEmail" (ngModelChange)="patchMessage({ email: $event })" />
+            <input type="text" [placeholder]="i18n.t('detail.messagePhoneOptional')" [ngModel]="messageForm().telephone" name="msgTelephone" (ngModelChange)="patchMessage({ telephone: $event })" />
+            <textarea rows="3" [placeholder]="i18n.t('detail.messageContent')" [ngModel]="messageForm().contenu" name="msgContenu" (ngModelChange)="patchMessage({ contenu: $event })"></textarea>
+            @if (messageError()) {
+              <p class="error">{{ messageError() }}</p>
+            }
+            <div class="message-form-actions">
+              <button type="submit" class="btn btn-gold btn-sm" [disabled]="sendingMessage()">{{ sendingMessage() ? i18n.t('detail.messageSending') : i18n.t('detail.messageSend') }}</button>
+              <button type="button" class="btn btn-ghost btn-sm" (click)="annulerMessage()">{{ i18n.t('form.cancel') }}</button>
+            </div>
+          </form>
+        }
+      </aside>
+    </div>
+
+    <div class="fiche-block avis-block">
+      <div class="avis-header">
+        <h2>{{ i18n.t('detail.reviews') }}</h2>
+        @if (avisResume().total > 0) {
+          <div class="avis-summary">
+            <span class="avis-stars">
+              @for (s of stars; track s) {
+                <svg viewBox="0 0 24 24" [attr.fill]="s <= avisResume().moyenne ? 'currentColor' : 'none'"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              }
+            </span>
+            <b>{{ avisResume().moyenne }}</b>
+            <span class="avis-count">({{ avisResume().total }})</span>
+          </div>
+        }
+        @if (!showAvisForm()) {
+          <button type="button" class="btn btn-ghost btn-sm" (click)="ouvrirFormulaireAvis()">{{ i18n.t('detail.avisWrite') }}</button>
+        }
+      </div>
+
+      @if (avisSent()) {
+        <p class="toast toast-success">{{ i18n.t('detail.avisSent') }}</p>
+      }
+
+      @if (showAvisForm()) {
+        <form class="avis-form" (ngSubmit)="envoyerAvis()">
+          <div class="avis-rating-input">
+            @for (s of stars; track s) {
+              <button type="button" class="star-btn" [class.active]="s <= avisForm().note" (click)="choisirNote(s)" [attr.aria-label]="'Note ' + s">
+                <svg viewBox="0 0 24 24" [attr.fill]="s <= avisForm().note ? 'currentColor' : 'none'"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              </button>
+            }
+          </div>
+          <input type="text" [placeholder]="i18n.t('detail.avisName')" [ngModel]="avisForm().nom" name="avisNom" (ngModelChange)="patchAvis({ nom: $event })" />
+          <input type="email" [placeholder]="i18n.t('detail.avisEmailOptional')" [ngModel]="avisForm().email" name="avisEmail" (ngModelChange)="patchAvis({ email: $event })" />
+          <textarea rows="3" [placeholder]="i18n.t('detail.avisComment')" [ngModel]="avisForm().commentaire" name="avisCommentaire" (ngModelChange)="patchAvis({ commentaire: $event })"></textarea>
+          @if (avisError()) {
+            <p class="error">{{ avisError() }}</p>
+          }
+          <div class="message-form-actions">
+            <button type="submit" class="btn btn-gold btn-sm" [disabled]="sendingAvis()">{{ sendingAvis() ? i18n.t('detail.avisSending') : i18n.t('detail.avisSend') }}</button>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="annulerAvis()">{{ i18n.t('form.cancel') }}</button>
+          </div>
+        </form>
+      }
+
+      @if (avisList().length) {
+        <div class="avis-list">
+          @for (a of avisList(); track a.id) {
+            <div class="avis-item">
+              <div class="avis-item-head">
+                <span class="avis-author">{{ a.nom }}</span>
+                <span class="avis-item-stars">
+                  @for (s of stars; track s) {
+                    <svg viewBox="0 0 24 24" [attr.fill]="s <= a.note ? 'currentColor' : 'none'"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+                  }
+                </span>
+              </div>
+              <p>{{ a.commentaire }}</p>
+            </div>
+          }
+        </div>
+      } @else if (!showAvisForm()) {
+        <p class="avis-empty">{{ i18n.t('detail.avisEmpty') }}</p>
+      }
+    </div>
+
+    @if (similar().length) {
+      <h2 class="similar-title">{{ i18n.t('detail.similar') }}</h2>
+      <div class="card-grid">
+        @for (a of similar(); track a.id) { <app-property-card [annonce]="a" /> }
+      </div>
+    }
+  </div>
+} @else {
+  <div class="not-found">
+    <p>{{ i18n.t('detail.notFound') }}</p>
+    <button class="btn btn-ghost" (click)="goBack()" type="button">{{ i18n.t('detail.back') }}</button>
+  </div>
+}
+
+<app-site-footer />

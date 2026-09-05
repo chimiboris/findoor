@@ -1,0 +1,69 @@
+<app-top-nav />
+
+<div class="wrap admin-wrap">
+  <app-back-button fallback="/admin/tableau-de-bord" />
+  <div class="head-row">
+    <h1>{{ i18n.t('admin.avisTitle') }}</h1>
+  </div>
+
+  <div class="tabs">
+    <button type="button" class="tab" [class.active]="onglet() === 'EN_ATTENTE'" (click)="onglet.set('EN_ATTENTE')">
+      {{ i18n.t('admin.avisPending') }} <span class="count">{{ compteurs().EN_ATTENTE }}</span>
+    </button>
+    <button type="button" class="tab" [class.active]="onglet() === 'PUBLIE'" (click)="onglet.set('PUBLIE')">
+      {{ i18n.t('admin.avisPublished') }} <span class="count">{{ compteurs().PUBLIE }}</span>
+    </button>
+    <button type="button" class="tab" [class.active]="onglet() === 'REJETE'" (click)="onglet.set('REJETE')">
+      {{ i18n.t('admin.avisRejected') }} <span class="count">{{ compteurs().REJETE }}</span>
+    </button>
+    <button type="button" class="tab" [class.active]="onglet() === 'TOUS'" (click)="onglet.set('TOUS')">
+      {{ i18n.t('admin.avisAll') }} <span class="count">{{ compteurs().TOUS }}</span>
+    </button>
+  </div>
+
+  @if (erreur()) {
+    <p class="error">{{ erreur() }}</p>
+  }
+
+  @if (loading()) {
+    <div class="empty-note">…</div>
+  } @else if (!filtres().length) {
+    <div class="empty-note">{{ i18n.t('admin.noResults') }}</div>
+  } @else {
+    <div class="avis-cards">
+      @for (a of filtres(); track a.id) {
+        <div class="avis-card">
+          <div class="avis-card-head">
+            <div>
+              <div class="a-name">{{ a.nom }}</div>
+              <a class="a-annonce" [routerLink]="['/admin/annonces', a.annonceId]">{{ a.annonceTitre }}</a>
+            </div>
+            <span class="a-stars">
+              @for (s of stars; track s) {
+                <svg viewBox="0 0 24 24" [attr.fill]="s <= a.note ? 'currentColor' : 'none'"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+              }
+            </span>
+          </div>
+          <p class="a-comment">{{ a.commentaire }}</p>
+          <div class="avis-card-foot">
+            <span class="a-meta">{{ a.email }} · {{ formatDate(a.dateCreation) }}</span>
+            <span class="badge" [class.badge-pending]="a.statut === 'EN_ATTENTE'" [class.badge-published]="a.statut === 'PUBLIE'" [class.badge-rejected]="a.statut === 'REJETE'">
+              {{ a.statut === 'EN_ATTENTE' ? i18n.t('admin.avisPending') : a.statut === 'PUBLIE' ? i18n.t('admin.avisPublished') : i18n.t('admin.avisRejected') }}
+            </span>
+          </div>
+          <div class="avis-card-actions">
+            @if (a.statut !== 'PUBLIE') {
+              <button type="button" class="btn btn-gold btn-sm" [disabled]="busyId() === a.id" (click)="approuver(a)">{{ i18n.t('admin.avisApprove') }}</button>
+            }
+            @if (a.statut !== 'REJETE') {
+              <button type="button" class="btn btn-ghost btn-sm" [disabled]="busyId() === a.id" (click)="rejeter(a)">{{ i18n.t('admin.avisReject') }}</button>
+            }
+            <button type="button" class="btn btn-ghost btn-sm btn-danger" [disabled]="busyId() === a.id" (click)="supprimer(a)">{{ i18n.t('admin.delete') }}</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<app-site-footer />
