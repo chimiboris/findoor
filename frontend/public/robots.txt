@@ -3,4 +3,4 @@ Allow: /
 Disallow: /proprietaire/
 Disallow: /admin/
 
-Sitemap: http://localhost:8081/sitemap.xml
+Sitemap: https://findoor-backend-mooh.onrender.com/sitemap.xml

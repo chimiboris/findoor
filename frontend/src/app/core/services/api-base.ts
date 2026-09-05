@@ -1,5 +1,7 @@
-/** Base URL de l'API Spring Boot (voir backend/src/main/resources/application.properties, server.port). */
-export const API_BASE = 'http://localhost:8081/api';
+import { environment } from '../../../environments/environment';
+
+/** Base URL de l'API Spring Boot — voir src/environments (environment.ts en dev, environment.prod.ts en prod). */
+export const API_BASE = environment.apiBase;
 
 /** Origine du backend, pour résoudre les URLs de photos servies sous /media/** (voir FileStorageService). */
 export const MEDIA_BASE = API_BASE.replace(/\/api$/, '');
